@@ -307,11 +307,17 @@ function showInit(){
  b.append(inpCode,inpName,btnJoin);o.append(b);o.className='on';
 }
 
-function initOnline(code,name){
+async function initOnline(code,name){
  const roomId='uno-room-'+code.replace(/[^a-zA-Z0-9-]/g,'');
- const peerConf={host:'uno-server-lxeo.onrender.com',port:443,secure:true,path:'/uno',config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]}};
+ const peerConf={host:'uno-server-lxeo.onrender.com',port:443,secure:true,path:'/uno',config:{iceServers:[
+  {urls:'stun:stun.l.google.com:19302'},
+  {urls:'stun:stun1.l.google.com:19302'},
+  {urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}
+ ]}};
+ $('ov').className='on';$('ov').innerHTML='<div class="box"><b>Membangunkan server...</b></div>';
+ try{await fetch('https://uno-server-lxeo.onrender.com/uno/',{mode:'no-cors',cache:'no-store'})}catch(e){}
+ $('ov').innerHTML='<div class="box"><b>Menghubungkan...</b></div>';
  peer=new Peer(roomId, peerConf);
- $('ov').className='on';$('ov').innerHTML='<div class="box"><b>Menghubungkan...</b></div>';
  
  peer.on('open',id=>{
   isHost=true;me='host';
@@ -344,9 +350,13 @@ function initOnline(code,name){
  
  peer.on('error',err=>{
   if(err.type==='unavailable-id'){
+   const fail=m=>{alert(m);location.reload()};
    isHost=false;peer=new Peer(peerConf);
+   peer.on('error',e=>fail('Error WebRTC ('+e.type+'): '+e.message));
    peer.on('open',id=>{
-    me=id;conn=peer.connect(roomId);
+    me=id;conn=peer.connect(roomId,{reliable:true});
+    conn.on('error',e=>fail('Gagal konek ke Host: '+e.message));
+    setTimeout(()=>{if(!conn.open)fail('Gagal konek ke host. Cek TURN atau jaringan Anda.')}, 20000);
     conn.on('open',()=>{
      ready=true;conn.send({type:'join',name:name});
      setInterval(()=>conn.send({type:'beat'}),30000);
