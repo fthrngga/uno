@@ -304,10 +304,13 @@
       display: flex;
       align-items: flex-end;
       overflow-x: auto;
-      min-height: 128px;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      min-height: 140px;
       padding: 24px 14px 18px;
       perspective: 700px
     }
+    #hand::-webkit-scrollbar { display: none; }
 
     #hand .c {
       margin-left: -26px;
