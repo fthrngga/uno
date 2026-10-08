@@ -1,414 +1,872 @@
 <!DOCTYPE html>
-<html lang="id"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>UNO Matte</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&display=swap">
-<style>
-:root{--bg:#F4F4F6;--fg:#1E1E24;--pane:#E3E3E8;--r:#D94848;--b:#4A7CDE;--g:#4D9E67;--y:#E5B63E;--k:#2C2C32;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1E1E24;--fg:#F4F4F6;--pane:#2B2B33}}
-:root[data-theme="dark"]{--bg:#1E1E24;--fg:#F4F4F6;--pane:#2B2B33}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--fg);font:500 14px Inter,system-ui,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
-#game-app{--cur:#4A7CDE;height:100%;max-width:560px;margin:auto;position:relative;display:flex;flex-direction:column}
-#opp{display:flex;justify-content:center;flex-wrap:wrap;gap:16px;padding:14px 12px 4px;min-height:74px}
-.o{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px}
-.av{position:relative;width:44px;height:44px;border-radius:50%;background:var(--pane);display:grid;place-items:center;font-weight:800}
-.av.on::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:3px solid var(--cur);animation:pu 1.6s ease-in-out infinite}
-.n{position:absolute;right:-7px;bottom:-5px;min-width:20px;height:20px;border-radius:10px;background:var(--fg);color:var(--bg);font-size:11px;font-weight:800;display:grid;place-items:center}
-#board{flex:1;position:relative;display:flex;align-items:center;justify-content:center;gap:30px}
-#dir{position:absolute;width:230px;height:230px;border-radius:50%;border:8px solid var(--cur);opacity:.2;display:grid;place-items:center;font-size:72px;color:var(--cur);animation:sp 16s linear infinite}
-#dir.rv{animation-direction:reverse}
-.pile{position:relative;width:60px;height:90px}
-.pile .c{position:absolute;left:0;top:0}
-#draw.go{cursor:pointer}#draw.go .c{outline:3px solid var(--cur);outline-offset:3px}
-.c{position:relative;flex:none;width:60px;height:90px;border-radius:8px;color:#fff;font-weight:800;box-shadow:0 4px 6px rgba(0,0,0,.1);transform-style:preserve-3d;backface-visibility:hidden;user-select:none;transform:translateY(var(--dy,0px)) rotate(var(--rot,0deg))}
-.c.r{background:var(--r)}.c.b{background:var(--b)}.c.g{background:var(--g)}.c.y{background:var(--y);color:#2C2C32}.c.k,.c.back{background:var(--k)}
-.c>*{position:absolute;backface-visibility:hidden;font-style:normal}
-.e{inset:20% 8%;border-radius:50%;background:#fff;opacity:.2;transform:rotate(-24deg)}
-.k .e{background:conic-gradient(var(--r) 0 25%,var(--b) 0 50%,var(--g) 0 75%,var(--y) 0);opacity:.85}
-.m{inset:0;display:grid;place-items:center;font-size:28px}
-.t,.u{font-size:11px}.t{left:6px;top:4px}.u{right:6px;bottom:4px;transform:rotate(180deg)}
-.bk{inset:0;border-radius:8px;background:var(--k);color:#F4F4F6;display:grid;place-items:center;font-size:15px;transform:rotateY(180deg)}
-.back::after{content:"UNO";position:absolute;inset:0;display:grid;place-items:center;color:#F4F4F6;font-size:15px}
-#msg{text-align:center;min-height:20px;padding:4px 12px;font-weight:700}
-#bar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;min-height:52px;padding:0 14px}
-button{font:700 14px Inter,system-ui,sans-serif;border:0;border-radius:99px;padding:12px 20px;background:var(--fg);color:var(--bg);cursor:pointer}
-button.s2{background:var(--pane);color:var(--fg)}button:disabled{opacity:.35;cursor:default}
-button:focus-visible,.c:focus-visible{outline:3px solid var(--cur);outline-offset:2px}
-#uno{background:var(--r);color:#fff;font-weight:800;padding:12px 24px;box-shadow:0 6px 12px rgba(0,0,0,.25)}
-#hand{display:flex;align-items:flex-end;overflow-x:auto;min-height:128px;padding:24px 14px 18px;perspective:700px}
-#hand .c{margin-left:-26px;cursor:pointer;transition:transform .18s ease-out}
-#hand .c:first-child{margin-left:auto}#hand .c:last-child{margin-right:auto}
-#hand .c:hover,#hand .c.s{transform:translateY(-16px) scale(1.08);z-index:2}
-#hand .c.valid{box-shadow:0 0 12px 2px var(--cur),0 4px 6px rgba(0,0,0,.1)}
-#hand .c.s{box-shadow:0 0 16px 4px var(--cur),0 8px 12px rgba(0,0,0,.2)}
-#ov{position:absolute;inset:0;display:none;place-items:center;background:rgba(20,20,24,.55);z-index:9}
-#ov.on{display:grid}
-.box{background:var(--bg);border-radius:16px;padding:22px;width:min(320px,86%);box-shadow:0 10px 30px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:12px}
-.box>b{font-size:18px}.box small{opacity:.7;line-height:1.4}
-.seg{display:flex;background:var(--pane);border-radius:8px;padding:3px;gap:2px}
-.seg b{flex:1;text-align:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;opacity:.6;transition:.2s}
-.seg b:hover{opacity:1;background:rgba(128,128,128,.15)}
-.seg b.on{opacity:1;background:var(--fg);color:var(--bg);box-shadow:0 2px 4px rgba(0,0,0,.15)}
-.pl{display:flex;justify-content:space-between;padding:10px 12px;border-radius:8px;background:var(--pane)}
-.pk{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pk i{height:56px;border-radius:12px;cursor:pointer}
-@keyframes pu{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.14);opacity:.3}}
-@keyframes sp{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-</style></head><body>
-<div id="game-app">
- <div id="opp"></div>
- <div id="board"><div id="dir"></div><div id="draw" class="pile"></div><div id="disc" class="pile"></div></div>
- <div id="msg"></div>
- <div id="bar"></div>
- <div id="hand"></div>
- <div id="ov"></div>
- <div id="chat-btn" style="position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--pane);display:grid;place-items:center;cursor:pointer;font-size:16px;z-index:8;box-shadow:0 2px 5px rgba(0,0,0,.1);transition:.2s">💬<div id="chat-notif" style="display:none;position:absolute;top:-2px;right:-2px;width:10px;height:10px;background:var(--r);border-radius:50%;border:2px solid var(--pane)"></div></div>
- <div id="chat-ui" style="display:none;position:absolute;top:60px;right:16px;width:min(320px,calc(100vw - 32px));height:min(400px, 60vh);background:var(--bg);border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.3);z-index:10;flex-direction:column;overflow:hidden;border:2px solid var(--pane)">
-  <div style="padding:16px;font-weight:800;background:var(--pane);display:flex;justify-content:space-between;align-items:center">
-    <span>Obrolan Room</span><span id="close-chat" style="cursor:pointer;font-size:18px;padding:4px">✕</span>
-  </div>
-  <div id="chat-msgs" style="flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;font-size:13px"></div>
-  <div style="padding:12px 16px;background:var(--pane);display:flex;gap:8px">
-    <input id="chat-inp" style="flex:1;padding:10px 14px;border-radius:99px;border:none;outline:none;font:inherit;background:var(--bg);color:var(--fg)" placeholder="Ketik pesan...">
-    <button id="chat-send" style="padding:10px 16px;font-size:13px">Kirim</button>
-  </div>
- </div>
-</div>
-<script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
-<script type="module">
-const $=id=>document.getElementById(id),CH={r:'#D94848',b:'#4A7CDE',g:'#4D9E67',y:'#E5B63E'},L={S:'⊘',R:'⇄',D:'+2',W:'W',F:'+4'};
-let S=null,me='me',P={},sel=[],pS=null,pHand=[],bt=0,ready=false,picking=false;
-let peer, conn, isHost = false, clients = [];
+<html lang="id">
 
-const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
-
-window.alert=msg=>{
- const o=el('div');
- o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;display:grid;place-items:center;backdrop-filter:blur(5px);animation:pu .3s ease-out';
- const b=el('div','box');b.style.textAlign='center';
- b.append(el('b','','Pemberitahuan'),el('p','',msg));
- const t=document.createElement('button');t.textContent='OK';
- t.onclick=()=>o.remove();b.append(t);
- o.append(b);document.body.append(o);
-};
-
-const btn=(t,f,c)=>{const b=el('button',c||'',t);b.onclick=f;return b};
-const isBot=i=>i.startsWith('bot-'),rnd=a=>a[Math.random()*a.length|0];
-const shuf=a=>{for(let i=a.length;i>1;){const j=Math.random()*i--|0;[a[i],a[j]]=[a[j],a[i]]}return a};
-const deck=()=>{const d=[];let n=0;const a=(c,v)=>d.push(c+v+'.'+n++);
- for(const c of 'rygb'){a(c,'0');for(const v of '123456789SRD'){a(c,v);a(c,v)}}
- for(let i=0;i<4;i++){a('k','W');a('k','F')}return d};
-const ok=(c,s=S)=>{
- if(s.drawPend>0){
-  const top=s.disc[s.disc.length-1];
-  if(top[1]=='F')return c[1]=='F';
-  if(top[1]=='D')return c[1]=='D'||c[1]=='F';
-  return false;
- }
- return c[0]=='k'||c[0]==s.col||c[1]==s.disc[s.disc.length-1][1];
-};
-const nx=(s,k=1)=>{const n=s.ids.length;return((s.turn+s.dir*k)%n+n)%n};
-const live=()=>Object.entries(P).sort((a,b)=>a[1].t-b[1].t);
-const mine=()=>S&&S.h[me]||[],myTurn=()=>S&&S.ph=='play'&&S.ids[S.turn]==me;
-
-function take(s,i,k){const o=[];while(k--){if(!s.draw.length){const t=s.disc.pop();s.draw=shuf(s.disc);s.disc=[t]}
- if(!s.draw.length)break;const c=s.draw.pop();s.h[s.ids[i]].push(c);o.push(c)}return o}
-function broadcastState(){
- if(!isHost)return;
- const msg={type:'sync',S,P};
- clients.forEach(c=>c.send(msg));
- render();
-}
-function commit(s){if(isHost){s.v=(S&&S.v||0)+1;S=s;sel=[];broadcastState()}}
-function sendAction(action,data){if(isHost)processAction(me,action,data);else if(conn&&conn.open)conn.send({type:'action',action,data})}
-
-function processAction(playerId,action,data){
- if(!isHost)return;
- if(action==='start'){
-  const l=live().slice(0,8);if(l.length<2)return;
-  const ids=l.map(x=>x[0]),d=shuf(deck()),h={};
-  ids.forEach(i=>h[i]=d.splice(0,data.cardsToDeal||7));
-  const t=d.splice(d.findIndex(c=>c[0]!='k'),1)[0];
-  const s={ids,names:Object.fromEntries(l.map(x=>[x[0],x[1].name])),h,draw:d,disc:[t],col:t[0],dir:1,turn:0,ph:'play',pend:null,uno:{},win:null,v:0,drawPend:0,drawRule:data.drawCount||1};
-  commit(s);
- }else if(action==='play'){
-  if(S.ids[S.turn]!==playerId)return;
-  const s=structuredClone(S), {cs,col}=data, h=s.h[playerId];
-  cs.forEach(c=>h.splice(h.indexOf(c),1));s.disc.push(...cs);
-  const c=cs[cs.length-1],v=c[1];let sk=0;s.col=c[0]=='k'?col:c[0];s.pend=null;
-  if(v=='R'){s.dir*=-1;if(s.ids.length==2)sk=1}
-  if(v=='S')sk=1;
-  if(v=='D')s.drawPend=(s.drawPend||0)+2;
-  if(v=='F')s.drawPend=(s.drawPend||0)+4;
-  if(!h.length){s.ph='over';s.win=playerId}
-  else{if(isBot(playerId))s.uno[playerId]=1;if(h.length==1&&!s.uno[playerId])take(s,s.turn,2);if(h.length!=1)delete s.uno[playerId];s.turn=nx(s,1+sk)}
-  commit(s);
- }else if(action==='draw'){
-  if(S.ids[S.turn]!==playerId)return;
-  const s=structuredClone(S);
-  if(s.drawPend>0){take(s,s.turn,s.drawPend);s.drawPend=0;s.turn=nx(s)}
-  else{
-   const ruleCount=s.drawRule||1;
-   const drawn=take(s,s.turn,ruleCount);
-   let playable=drawn.find(c=>ok(c,s));
-   if(playable&&ruleCount==1)s.pend=playable;else s.turn=nx(s);
-  }
-  commit(s);
- }else if(action==='keep'){
-  if(S.ids[S.turn]!==playerId)return;
-  const s=structuredClone(S);s.pend=null;s.turn=nx(s);commit(s);
- }else if(action==='uno'){
-  const s=structuredClone(S);s.uno[playerId]=1;commit(s);
- }else if(action==='addBot'){
-  const id='bot-'+Math.random().toString(36).slice(2,6);
-  P[id]={name:'Bot '+(Object.keys(P).filter(isBot).length+1),bot:1,t:Date.now()+2e10};
-  broadcastState();
- }else if(action==='delp'){
-  delete P[data.id];broadcastState();
- }
-}
-
-function pick(f){picking=true;const o=$('ov'),b=el('div','box'),g=el('div','pk');o.innerHTML='';b.append(el('b','','Pilih warna'),g);
- for(const k in CH){const i=el('i');i.style.background=CH[k];i.onclick=()=>{picking=false;o.className='';f(k)};g.append(i)}
- o.append(b);o.className='on'}
-function go(cs){cs[cs.length-1][0]=='k'?pick(k=>sendAction('play',{cs,col:k})):sendAction('play',{cs})}
-function tap(c){if(!myTurn())return;const num=/\d/.test(c[1]);
- if(S.pend)return c==S.pend?go([c]):0;
- if(sel.includes(c)){sel=sel.filter(x=>x!=c);return render()}
- if(!sel.length){if(!ok(c))return;if(!num||!mine().some(x=>x!=c&&x[1]==c[1]))return go([c]);sel=[c]}
- else{if(!num||c[1]!=S.h[me].find(x=>x==sel[0])[1])return;sel.push(c)}render()}
-
-function bot(){
- if(!S||S.ph!='play'||!isBot(S.ids[S.turn]))return;
- const h=S.h[S.ids[S.turn]];
- const c=S.pend||h.find(x=>ok(x)&&x[0]!='k')||h.find(x=>ok(x));
- if(!c)return processAction(S.ids[S.turn],'draw');
- const n={};h.forEach(x=>x[0]!='k'&&(n[x[0]]=(n[x[0]]||0)+1));
- const col=Object.keys(n).sort((a,b)=>n[b]-n[a])[0]||rnd(['r','y','g','b']);
- processAction(S.ids[S.turn],'play',{cs:[c],col});
-}
-
-function card(c){const e=el('div','c '+c[0]),t=L[c[1]]||c[1];e.dataset.id=c;
- e.innerHTML=`<i class=e></i><b class=t>${t}</b><b class=m>${t}</b><b class=u>${t}</b><i class=bk>UNO</i>`;return e}
-function fly(e,f,flip,delay=0){if(matchMedia('(prefers-reduced-motion:reduce)').matches){e.style.opacity=1;return}
- if(delay>0)e.style.opacity=0;
- setTimeout(()=>{e.style.opacity=1;
-  const r=e.getBoundingClientRect(),y=e.style.getPropertyValue('--dy')||'0px',q=e.style.getPropertyValue('--rot')||'0deg',
-  t=(x,z,a,s)=>`translate(${x}px,calc(${z}px + ${y})) rotateY(${a}deg) rotate(${q}) scale(${s})`;
-  e.animate([{transform:t(f.left-r.left,f.top-r.top,flip?180:0,flip?1:.9),opacity:.6},{transform:t(0,0,0,1),opacity:1}],
-   {duration:flip?600:380,easing:'cubic-bezier(.2,.8,.2,1)'})
- },delay)}
-
-function seg(id,opts,def){
- const d=el('div','seg');d.id=id;d.dataset.v=def;
- opts.forEach(([v,l])=>{
-  const b=el('b',v==def?'on':'',l);
-  b.onclick=()=>{d.dataset.v=v;[...d.children].forEach(c=>c.className='');b.className='on'};
-  d.append(b);
- });
- return d;
-}
-
-function lobby(s){const o=$('ov'),b=el('div','box');o.innerHTML='';
- if(s&&s.ph=='over'&&!s.ack){
-  b.style.textAlign='center';b.append(el('b','','🏆 '+s.names[s.win]+' Menang!'));
-  const ls=s.ids.filter(i=>i!=s.win).map(i=>s.names[i]).join(', ');
-  if(ls)b.append(el('p','','Dasar payah: '+ls+' 🤪'));
-  if(isHost)b.append(btn('Lanjut ke Pengaturan',()=>sendAction('ack')));
-  else b.append(el('small','','Menunggu host...'));
-  o.append(b);o.className='on';return;
- }
- b.append(el('b','',!ready?'Menghubungkan...':!s?'Ruang UNO':s.ph=='over'?'Permainan Selesai':'Pertandingan sedang berjalan'));
- if(ready){const l=live();
-  l.forEach(([i,p])=>{const r=el('div','pl',p.name+(i==me?' (kamu)':''));
-   if(isHost&&p.bot){const x=el('span','','×');x.style.cursor='pointer';x.onclick=()=>sendAction('delp',{id:i});r.append(x)}b.append(r)});
-  if(isHost){b.append(el('small','','Bagikan kode room ini ke temanmu, mereka bisa masuk dengan kode yang sama.'));
-   if(l.length<8)b.append(btn('Tambah bot',()=>sendAction('addBot'),'s2'));
-   if(!s||s.ph=='over'){
-    const r1=el('div','pl');r1.append(el('span','','Kartu Awal:'),seg('s-card',[[5,'5'],[7,'7'],[10,'10']],7));
-    const r2=el('div','pl');r2.append(el('span','','Aturan Draw:'),seg('s-draw',[[1,'1x'],[2,'2x'],[3,'3x']],1));
-    b.append(r1,r2);
-    const g=btn(s&&s.ph=='over'?'Main lagi':'Mulai',()=>sendAction('start',{cardsToDeal:parseInt($('s-card').dataset.v),drawCount:parseInt($('s-draw').dataset.v)}));
-    g.disabled=l.length<2;b.append(g)
-   }
-  }else b.append(el('small','','Menunggu host mengatur permainan...'));
- }
- o.append(b);o.className='on'}
-
-function render(){
- const hd=$('hand'),old={},opR={},dr=$('draw').getBoundingClientRect(),A=[],s=S,h=mine();
- hd.querySelectorAll('.c').forEach(e=>old[e.dataset.id]=e.getBoundingClientRect());
- $('opp').querySelectorAll('.av').forEach(e=>opR[e.dataset.id]=e.getBoundingClientRect());
- for(const k of ['hand','opp','disc','draw','bar'])$(k).innerHTML='';$('msg').textContent='';
- if(s){const my=myTurn(),cur=s.ids[s.turn],k=s.ids.indexOf(me),els={};
-  $('game-app').style.setProperty('--cur',CH[s.col]);
-  (k<0?s.ids:s.ids.map((_,i)=>s.ids[(i+k+1)%s.ids.length]).filter(i=>i!=me)).forEach(i=>{
-   const o=el('div','o'),a=el('div','av'+(i==cur&&s.ph=='play'?' on':''),(s.names[i]||'?')[0].toUpperCase());
-   a.dataset.id=i;a.append(el('span','n',s.h[i].length));
-   o.append(a,el('span','',s.names[i]+(s.h[i].length==1?' – UNO!':'')));$('opp').append(o)});
-  const d=$('dir');d.textContent=s.dir<0?'↺':'↻';d.className=s.dir<0?'rv':'';
-  s.disc.slice(-5).forEach((c,i,arr)=>{
-   const isTop=(i===arr.length-1);const e=card(c);
-   if(isTop&&c[0]=='k'&&s.col)e.className='c '+s.col;
-   let hv=0;for(let j=0;j<c.length;j++)hv=Math.imul(31,hv)+c.charCodeAt(j)|0;
-   e.style.setProperty('--rot',((hv%31)-15)+'deg');
-   e.style.setProperty('--dx',((hv%21)-10)+'px');
-   e.style.setProperty('--dy',(((hv>>4)%21)-10)+'px');
-   $('disc').append(e)});
-  $('draw').className='pile'+(my&&!s.pend?' go':'');$('draw').append(el('div','c back'));
-  const n=h.length,mid=(n-1)/2;
-  h.forEach((c,i)=>{const e=card(c);els[c]=e;
-   e.style.setProperty('--rot',((i-mid)*Math.min(4,30/n)).toFixed(1)+'deg');
-   e.style.setProperty('--dy',(Math.abs(i-mid)**2*Math.min(1.2,6/n)).toFixed(1)+'px');
-   e.style.setProperty('--dx','0px');
-   if(sel.includes(c)||s.pend==c)e.classList.add('s');
-   if(my&&(s.pend?s.pend==c:ok(c)))e.classList.add('valid');
-   e.tabIndex=0;e.onclick=()=>tap(c);e.onkeydown=ev=>ev.key=='Enter'&&tap(c);hd.append(e);
-   if(!pHand.includes(c)&&!old[c]){
-    const isDealing=pHand.length===0&&h.length>3;
-    A.push(()=>fly(e,dr,1,isDealing?i*120:0))
-   }});
-  if(s.ph=='play'){
-   let m='';
-   if(my){if(s.pend)m='Kartu ini cocok. Mainkan atau simpan?';else if(s.drawPend>0)m=`+${s.drawPend} kartu! Tumpuk kartu, atau Draw.`;else m='Giliranmu'}
-   else{m='Giliran '+s.names[cur];if(s.drawPend>0)m+=` (+${s.drawPend})`}
-   $('msg').textContent=m;
-  }
-  if(my&&s.pend)$('bar').append(btn('Mainkan',()=>go([s.pend])),btn('Simpan',()=>sendAction('keep'),'s2'));
-  else if(my&&sel.length)$('bar').append(btn('Mainkan '+sel.length+' kartu',()=>go(sel)),btn('Batal',()=>{sel=[];render()},'s2'));
-  const u=btn('UNO!',()=>sendAction('uno'));u.id='uno';u.disabled=!(my&&n==2&&!s.uno[me]);$('bar').append(u);
-  if(pS&&pS.v!=s.v){
-   const top=s.disc[s.disc.length-1],te=$('disc').lastElementChild;
-   if(pS.disc[pS.disc.length-1]!=top&&te){const f=old[top]||opR[pS.ids[pS.turn]];if(f)A.push(()=>fly(te,f))}
-  }
- }
- if(!picking){const o=$('ov');
-  if(!ready||!s||s.ph=='over'||!s.ids.includes(me)){if(peer)lobby(s)}
-  else{o.className='';o.innerHTML=''}
- }
- A.forEach(f=>f());pS=s;pHand=h.slice();clearTimeout(bt);
- if(s&&s.ph=='play'&&isBot(s.ids[s.turn])&&isHost)bt=setTimeout(bot,1500);
-}
-$('draw').onclick=()=>{if(myTurn()&&!S.pend)sendAction('draw')};
-
-function showInit(){
- const o=$('ov'),b=el('div','box');b.append(el('b','','UNO Online'));
- const inpCode=el('input');inpCode.placeholder='Kode Room';inpCode.value='';
- inpCode.style='padding:10px; border-radius:8px; border:1px solid #ccc; font:inherit;';
- const inpName=el('input');inpName.placeholder='Nama Kamu';inpName.value=localStorage.getItem('uno-name')||'';
- inpName.style='padding:10px; border-radius:8px; border:1px solid #ccc; font:inherit;';
- const btnJoin=btn('Masuk',()=>{
-  if(!inpName.value.trim()||!inpCode.value.trim())return alert('Isi nama dan kode room terlebih dahulu.');
-  localStorage.setItem('uno-name',inpName.value.trim());
-  o.className='';o.innerHTML='';initOnline(inpCode.value.trim(),inpName.value.trim());
- });
- b.append(inpCode,inpName,btnJoin);o.append(b);o.className='on';
-}
-
-async function initOnline(code,name){
- const roomId='uno-room-'+code.replace(/[^a-zA-Z0-9-]/g,'');
- const U='c40f0c8902451c3054b38f8b', C='oDiK/a0+27rEgKAi';
- const peerConf={host:'uno-server-lxeo.onrender.com',port:443,secure:true,path:'/uno',config:{iceServers:[
-  {urls:'stun:stun.l.google.com:19302'},
-  {urls:'stun:stun1.l.google.com:19302'},
-  {urls:'turn:global.relay.metered.ca:80',username:U,credential:C},
-  {urls:'turn:global.relay.metered.ca:80?transport=tcp',username:U,credential:C},
-  {urls:'turn:global.relay.metered.ca:443',username:U,credential:C},
-  {urls:'turns:global.relay.metered.ca:443?transport=tcp',username:U,credential:C},
-  {urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}
- ]}};
- $('ov').className='on';$('ov').innerHTML='<div class="box"><b>Membangunkan server...</b></div>';
- try{await fetch('https://uno-server-lxeo.onrender.com/uno/',{mode:'no-cors',cache:'no-store'})}catch(e){}
- $('ov').innerHTML='<div class="box"><b>Menghubungkan...</b></div>';
- peer=new Peer(roomId, peerConf);
- 
- peer.on('open',id=>{
-  isHost=true;me='host';
-  P={host:{name:name+' (Host)',t:Date.now(),bot:0}};ready=true;
-  
-  peer.on('connection',c=>{
-   clients.push(c);
-   c.on('data',data=>{
-    if(data.type==='join'){
-     if(S&&S.ph==='play'){c.send({type:'rejected',msg:'Pertandingan sedang berlangsung, harap tunggu hingga selesai.'});return}
-     P[c.peer]={name:data.name,t:Date.now(),bot:0};broadcastState();
-    }else if(data.type==='action'){processAction(c.peer,data.action,data.data);
-    }else if(data.type==='beat'){if(P[c.peer])P[c.peer].t=Date.now();
-    }else if(data.type==='chat'){
-     clients.forEach(x=>{if(x!==c)x.send(data)});appendChat(data.name,data.msg,false);
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>UNO Matte</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&display=swap">
+  <style>
+    :root {
+      --bg: #F4F4F6;
+      --fg: #1E1E24;
+      --pane: #E3E3E8;
+      --r: #D94848;
+      --b: #4A7CDE;
+      --g: #4D9E67;
+      --y: #E5B63E;
+      --k: #2C2C32;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px)
     }
-   });
-   c.on('close',()=>{clients=clients.filter(x=>x!==c);if(P[c.peer]){delete P[c.peer];broadcastState()}});
-   c.on('error',()=>{clients=clients.filter(x=>x!==c)});
-  });
-  
-  setInterval(()=>{
-   const now=Date.now();let changed=false;
-   if(P.host)P.host.t=now;
-   Object.entries(P).forEach(([i,p])=>{if(!p.bot&&i!=='host'&&now-p.t>120000){delete P[i];changed=true}});
-   if(changed)broadcastState();
-  },30000);
-  render();
- });
- 
- peer.on('error',err=>{
-  if(err.type==='unavailable-id'){
-   const fail=m=>{alert(m);location.reload()};
-   isHost=false;peer=new Peer(peerConf);
-   peer.on('error',e=>fail('Error WebRTC ('+e.type+'): '+e.message));
-   peer.on('open',id=>{
-    me=id;conn=peer.connect(roomId,{reliable:true});
-    conn.on('error',e=>fail('Gagal konek ke Host: '+e.message));
-    setTimeout(()=>{if(!conn.open)fail('Gagal konek ke host. Cek TURN atau jaringan Anda.')}, 20000);
-    conn.on('open',()=>{
-     ready=true;conn.send({type:'join',name:name});
-     setInterval(()=>conn.send({type:'beat'}),30000);
-    });
-    conn.on('data',data=>{
-     if(data.type==='sync'){S=data.S;P=data.P;sel=[];render()}
-     else if(data.type==='chat')appendChat(data.name,data.msg,false);
-     else if(data.type==='clear-chat')$('chat-msgs').innerHTML='';
-     else if(data.type==='rejected'){alert(data.msg);location.reload()}
-    });
-    conn.on('close',()=>{alert('Host terputus. Permainan berakhir.');location.reload()});
-   });
-  }else{alert('Error jaringan: '+err.message);location.reload()}
- });
-}
 
-$('chat-btn').onclick=()=>{
- $('chat-ui').style.display='flex';
- $('chat-btn').style.transform='scale(1)';
- $('chat-notif').style.display='none';
- setTimeout(()=>$('chat-msgs').scrollTop=$('chat-msgs').scrollHeight,10);
-};
-$('close-chat').onclick=()=>$('chat-ui').style.display='none';
-function sendChat(){
- const i=$('chat-inp');if(!i.value.trim()||!ready)return;
- const myName=P[me=='host'?'host':me]?.name||'Pemain';
- const msg={type:'chat',name:myName,msg:i.value.trim()};
- if(isHost)clients.forEach(c=>c.send(msg));
- else if(conn&&conn.open)conn.send(msg);
- appendChat(myName,msg.msg,true);
- i.value='';
-}
-$('chat-send').onclick=sendChat;
-$('chat-inp').onkeydown=e=>{if(e.key=='Enter')sendChat()};
-function appendChat(name,msg,isMe){
- const c=$('chat-msgs'),d=el('div');
- d.style.display='flex';d.style.flexDirection='column';d.style.alignItems=isMe?'flex-end':'flex-start';
- d.innerHTML=`<small style="opacity:.6;margin:0 4px 2px;font-size:11px">${name}</small><div style="background:${isMe?'var(--cur)':'var(--pane)'};color:${isMe?'#fff':'inherit'};padding:8px 12px;border-radius:12px;max-width:85%;word-break:break-word;box-shadow:0 1px 2px rgba(0,0,0,.1)">${msg.replace(/</g,'&lt;')}</div>`;
- const isAtBottom=c.scrollHeight-c.scrollTop-c.clientHeight<50;
- c.append(d);
- if(isMe||isAtBottom)setTimeout(()=>c.scrollTop=c.scrollHeight,10);
- if($('chat-ui').style.display!=='flex'){
-  $('chat-btn').style.transform='scale(1.2)';setTimeout(()=>$('chat-btn').style.transform='scale(1)',500);
-  if(!isMe)$('chat-notif').style.display='block';
- }
-}
+    @media (prefers-color-scheme:dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #1E1E24;
+        --fg: #F4F4F6;
+        --pane: #2B2B33
+      }
+    }
 
-showInit();
-</script>
-</body></html>
+    :root[data-theme="dark"] {
+      --bg: #1E1E24;
+      --fg: #F4F4F6;
+      --pane: #2B2B33
+    }
+
+    html {
+      scroll-padding-top: env(safe-area-inset-top, 0px)
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font: 500 14px Inter, system-ui, sans-serif;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent
+    }
+
+    #game-app {
+      --cur: #4A7CDE;
+      height: 100%;
+      max-width: 560px;
+      margin: auto;
+      position: relative;
+      display: flex;
+      flex-direction: column
+    }
+
+    #opp {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 14px 12px 4px;
+      min-height: 74px
+    }
+
+    .o {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px
+    }
+
+    .av {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--pane);
+      display: grid;
+      place-items: center;
+      font-weight: 800
+    }
+
+    .av.on::after {
+      content: "";
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      border: 3px solid var(--cur);
+      animation: pu 1.6s ease-in-out infinite
+    }
+
+    .n {
+      position: absolute;
+      right: -7px;
+      bottom: -5px;
+      min-width: 20px;
+      height: 20px;
+      border-radius: 10px;
+      background: var(--fg);
+      color: var(--bg);
+      font-size: 11px;
+      font-weight: 800;
+      display: grid;
+      place-items: center
+    }
+
+    #board {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px
+    }
+
+    #dir {
+      position: absolute;
+      width: 230px;
+      height: 230px;
+      border-radius: 50%;
+      border: 8px solid var(--cur);
+      opacity: .2;
+      display: grid;
+      place-items: center;
+      font-size: 72px;
+      color: var(--cur);
+      animation: sp 16s linear infinite
+    }
+
+    #dir.rv {
+      animation-direction: reverse
+    }
+
+    .pile {
+      position: relative;
+      width: 60px;
+      height: 90px
+    }
+
+    .pile .c {
+      position: absolute;
+      left: 0;
+      top: 0
+    }
+
+    #draw.go {
+      cursor: pointer
+    }
+
+    #draw.go .c {
+      outline: 3px solid var(--cur);
+      outline-offset: 3px
+    }
+
+    .c {
+      position: relative;
+      flex: none;
+      width: 60px;
+      height: 90px;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, .1);
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+      user-select: none;
+      transform: translateY(var(--dy, 0px)) rotate(var(--rot, 0deg))
+    }
+
+    .c.r {
+      background: var(--r)
+    }
+
+    .c.b {
+      background: var(--b)
+    }
+
+    .c.g {
+      background: var(--g)
+    }
+
+    .c.y {
+      background: var(--y);
+      color: #2C2C32
+    }
+
+    .c.k,
+    .c.back {
+      background: var(--k)
+    }
+
+    .c>* {
+      position: absolute;
+      backface-visibility: hidden;
+      font-style: normal
+    }
+
+    .e {
+      inset: 20% 8%;
+      border-radius: 50%;
+      background: #fff;
+      opacity: .2;
+      transform: rotate(-24deg)
+    }
+
+    .k .e {
+      background: conic-gradient(var(--r) 0 25%, var(--b) 0 50%, var(--g) 0 75%, var(--y) 0);
+      opacity: .85
+    }
+
+    .m {
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: 28px
+    }
+
+    .t,
+    .u {
+      font-size: 11px
+    }
+
+    .t {
+      left: 6px;
+      top: 4px
+    }
+
+    .u {
+      right: 6px;
+      bottom: 4px;
+      transform: rotate(180deg)
+    }
+
+    .bk {
+      inset: 0;
+      border-radius: 8px;
+      background: var(--k);
+      color: #F4F4F6;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      transform: rotateY(180deg)
+    }
+
+    .back::after {
+      content: "UNO";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: #F4F4F6;
+      font-size: 15px
+    }
+
+    #msg {
+      text-align: center;
+      min-height: 20px;
+      padding: 4px 12px;
+      font-weight: 700
+    }
+
+    #bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      min-height: 52px;
+      padding: 0 14px
+    }
+
+    button {
+      font: 700 14px Inter, system-ui, sans-serif;
+      border: 0;
+      border-radius: 99px;
+      padding: 12px 20px;
+      background: var(--fg);
+      color: var(--bg);
+      cursor: pointer
+    }
+
+    button.s2 {
+      background: var(--pane);
+      color: var(--fg)
+    }
+
+    button:disabled {
+      opacity: .35;
+      cursor: default
+    }
+
+    button:focus-visible,
+    .c:focus-visible {
+      outline: 3px solid var(--cur);
+      outline-offset: 2px
+    }
+
+    #uno {
+      background: var(--r);
+      color: #fff;
+      font-weight: 800;
+      padding: 12px 24px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, .25)
+    }
+
+    #hand {
+      display: flex;
+      align-items: flex-end;
+      overflow-x: auto;
+      min-height: 128px;
+      padding: 24px 14px 18px;
+      perspective: 700px
+    }
+
+    #hand .c {
+      margin-left: -26px;
+      cursor: pointer;
+      transition: transform .18s ease-out
+    }
+
+    #hand .c:first-child {
+      margin-left: auto
+    }
+
+    #hand .c:last-child {
+      margin-right: auto
+    }
+
+    #hand .c:hover,
+    #hand .c.s {
+      transform: translateY(-16px) scale(1.08);
+      z-index: 2
+    }
+
+    #hand .c.valid {
+      box-shadow: 0 0 12px 2px var(--cur), 0 4px 6px rgba(0, 0, 0, .1)
+    }
+
+    #hand .c.s {
+      box-shadow: 0 0 16px 4px var(--cur), 0 8px 12px rgba(0, 0, 0, .2)
+    }
+
+    #ov {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(20, 20, 24, .55);
+      z-index: 9
+    }
+
+    #ov.on {
+      display: grid
+    }
+
+    .box {
+      background: var(--bg);
+      border-radius: 16px;
+      padding: 22px;
+      width: min(320px, 86%);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+      display: flex;
+      flex-direction: column;
+      gap: 12px
+    }
+
+    .box>b {
+      font-size: 18px
+    }
+
+    .box small {
+      opacity: .7;
+      line-height: 1.4
+    }
+
+    .seg {
+      display: flex;
+      background: var(--pane);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px
+    }
+
+    .seg b {
+      flex: 1;
+      text-align: center;
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      opacity: .6;
+      transition: .2s
+    }
+
+    .seg b:hover {
+      opacity: 1;
+      background: rgba(128, 128, 128, .15)
+    }
+
+    .seg b.on {
+      opacity: 1;
+      background: var(--fg);
+      color: var(--bg);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, .15)
+    }
+
+    .pl {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--pane)
+    }
+
+    .pk {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px
+    }
+
+    .pk i {
+      height: 56px;
+      border-radius: 12px;
+      cursor: pointer
+    }
+
+    @keyframes pu {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: .9
+      }
+
+      50% {
+        transform: scale(1.14);
+        opacity: .3
+      }
+    }
+
+    @keyframes sp {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce) {
+      * {
+        animation: none !important;
+        transition: none !important
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="game-app">
+    <div id="opp"></div>
+    <div id="board">
+      <div id="dir"></div>
+      <div id="draw" class="pile"></div>
+      <div id="disc" class="pile"></div>
+    </div>
+    <div id="msg"></div>
+    <div id="bar"></div>
+    <div id="hand"></div>
+    <div id="ov"></div>
+    <div id="chat-btn"
+      style="position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:var(--pane);display:grid;place-items:center;cursor:pointer;font-size:16px;z-index:8;box-shadow:0 2px 5px rgba(0,0,0,.1);transition:.2s">
+      💬<div id="chat-notif"
+        style="display:none;position:absolute;top:-2px;right:-2px;width:10px;height:10px;background:var(--r);border-radius:50%;border:2px solid var(--pane)">
+      </div>
+    </div>
+    <div id="chat-ui"
+      style="display:none;position:absolute;top:60px;right:16px;width:min(320px,calc(100vw - 32px));height:min(400px, 60vh);background:var(--bg);border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.3);z-index:10;flex-direction:column;overflow:hidden;border:2px solid var(--pane)">
+      <div
+        style="padding:16px;font-weight:800;background:var(--pane);display:flex;justify-content:space-between;align-items:center">
+        <span>Obrolan Room</span><span id="close-chat" style="cursor:pointer;font-size:18px;padding:4px">✕</span>
+      </div>
+      <div id="chat-msgs"
+        style="flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;font-size:13px"></div>
+      <div style="padding:12px 16px;background:var(--pane);display:flex;gap:8px">
+        <input id="chat-inp"
+          style="flex:1;padding:10px 14px;border-radius:99px;border:none;outline:none;font:inherit;background:var(--bg);color:var(--fg)"
+          placeholder="Ketik pesan...">
+        <button id="chat-send" style="padding:10px 16px;font-size:13px">Kirim</button>
+      </div>
+    </div>
+  </div>
+  <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+  <script type="module">
+    const $ = id => document.getElementById(id), CH = { r: '#D94848', b: '#4A7CDE', g: '#4D9E67', y: '#E5B63E' }, L = { S: '⊘', R: '⇄', D: '+2', W: 'W', F: '+4' };
+    let S = null, me = 'me', P = {}, sel = [], pS = null, pHand = [], bt = 0, ready = false, picking = false;
+    let peer, conn, isHost = false, clients = [];
+
+    const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e };
+
+    window.alert = msg => {
+      const o = el('div');
+      o.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;display:grid;place-items:center;backdrop-filter:blur(5px);animation:pu .3s ease-out';
+      const b = el('div', 'box'); b.style.textAlign = 'center';
+      b.append(el('b', '', 'Pemberitahuan'), el('p', '', msg));
+      const t = document.createElement('button'); t.textContent = 'OK';
+      t.onclick = () => o.remove(); b.append(t);
+      o.append(b); document.body.append(o);
+    };
+
+    const btn = (t, f, c) => { const b = el('button', c || '', t); b.onclick = f; return b };
+    const isBot = i => i.startsWith('bot-'), rnd = a => a[Math.random() * a.length | 0];
+    const shuf = a => { for (let i = a.length; i > 1;) { const j = Math.random() * i-- | 0;[a[i], a[j]] = [a[j], a[i]] } return a };
+    const deck = () => {
+      const d = []; let n = 0; const a = (c, v) => d.push(c + v + '.' + n++);
+      for (const c of 'rygb') { a(c, '0'); for (const v of '123456789SRD') { a(c, v); a(c, v) } }
+      for (let i = 0; i < 4; i++) { a('k', 'W'); a('k', 'F') } return d
+    };
+    const ok = (c, s = S) => {
+      if (s.drawPend > 0) {
+        const top = s.disc[s.disc.length - 1];
+        if (top[1] == 'F') return c[1] == 'F';
+        if (top[1] == 'D') return c[1] == 'D' || c[1] == 'F';
+        return false;
+      }
+      return c[0] == 'k' || c[0] == s.col || c[1] == s.disc[s.disc.length - 1][1];
+    };
+    const nx = (s, k = 1) => { const n = s.ids.length; return ((s.turn + s.dir * k) % n + n) % n };
+    const live = () => Object.entries(P).sort((a, b) => a[1].t - b[1].t);
+    const mine = () => S && S.h[me] || [], myTurn = () => S && S.ph == 'play' && S.ids[S.turn] == me;
+
+    function take(s, i, k) {
+      const o = []; while (k--) {
+        if (!s.draw.length) { const t = s.disc.pop(); s.draw = shuf(s.disc); s.disc = [t] }
+        if (!s.draw.length) break; const c = s.draw.pop(); s.h[s.ids[i]].push(c); o.push(c)
+      } return o
+    }
+    function broadcastState() {
+      if (!isHost) return;
+      const msg = { type: 'sync', S, P };
+      clients.forEach(c => c.send(msg));
+      render();
+    }
+    function commit(s) { if (isHost) { s.v = (S && S.v || 0) + 1; S = s; sel = []; broadcastState() } }
+    function sendAction(action, data) { if (isHost) processAction(me, action, data); else if (conn && conn.open) conn.send({ type: 'action', action, data }) }
+
+    function processAction(playerId, action, data) {
+      if (!isHost) return;
+      if (action === 'start') {
+        const l = live().slice(0, 8); if (l.length < 2) return;
+        const ids = l.map(x => x[0]), d = shuf(deck()), h = {};
+        ids.forEach(i => h[i] = d.splice(0, data.cardsToDeal || 7));
+        const t = d.splice(d.findIndex(c => c[0] != 'k'), 1)[0];
+        const s = { ids, names: Object.fromEntries(l.map(x => [x[0], x[1].name])), h, draw: d, disc: [t], col: t[0], dir: 1, turn: 0, ph: 'play', pend: null, uno: {}, win: null, v: 0, drawPend: 0, drawRule: data.drawCount || 1 };
+        commit(s);
+      } else if (action === 'play') {
+        if (S.ids[S.turn] !== playerId) return;
+        const s = structuredClone(S), { cs, col } = data, h = s.h[playerId];
+        cs.forEach(c => h.splice(h.indexOf(c), 1)); s.disc.push(...cs);
+        const c = cs[cs.length - 1], v = c[1]; let sk = 0; s.col = c[0] == 'k' ? col : c[0]; s.pend = null;
+        if (v == 'R') { s.dir *= -1; if (s.ids.length == 2) sk = 1 }
+        if (v == 'S') sk = 1;
+        if (v == 'D') s.drawPend = (s.drawPend || 0) + 2;
+        if (v == 'F') s.drawPend = (s.drawPend || 0) + 4;
+        if (!h.length) { s.ph = 'over'; s.win = playerId }
+        else { if (isBot(playerId)) s.uno[playerId] = 1; if (h.length == 1 && !s.uno[playerId]) take(s, s.turn, 2); if (h.length != 1) delete s.uno[playerId]; s.turn = nx(s, 1 + sk) }
+        commit(s);
+      } else if (action === 'draw') {
+        if (S.ids[S.turn] !== playerId) return;
+        const s = structuredClone(S);
+        if (s.drawPend > 0) { take(s, s.turn, s.drawPend); s.drawPend = 0; s.turn = nx(s) }
+        else {
+          const ruleCount = s.drawRule || 1;
+          const drawn = take(s, s.turn, ruleCount);
+          let playable = drawn.find(c => ok(c, s));
+          if (playable && ruleCount == 1) s.pend = playable; else s.turn = nx(s);
+        }
+        commit(s);
+      } else if (action === 'keep') {
+        if (S.ids[S.turn] !== playerId) return;
+        const s = structuredClone(S); s.pend = null; s.turn = nx(s); commit(s);
+      } else if (action === 'uno') {
+        const s = structuredClone(S); s.uno[playerId] = 1; commit(s);
+      } else if (action === 'addBot') {
+        const id = 'bot-' + Math.random().toString(36).slice(2, 6);
+        P[id] = { name: 'Bot ' + (Object.keys(P).filter(isBot).length + 1), bot: 1, t: Date.now() + 2e10 };
+        broadcastState();
+      } else if (action === 'delp') {
+        delete P[data.id]; broadcastState();
+      }
+    }
+
+    function pick(f) {
+      picking = true; const o = $('ov'), b = el('div', 'box'), g = el('div', 'pk'); o.innerHTML = ''; b.append(el('b', '', 'Pilih warna'), g);
+      for (const k in CH) { const i = el('i'); i.style.background = CH[k]; i.onclick = () => { picking = false; o.className = ''; f(k) }; g.append(i) }
+      o.append(b); o.className = 'on'
+    }
+    function go(cs) { cs[cs.length - 1][0] == 'k' ? pick(k => sendAction('play', { cs, col: k })) : sendAction('play', { cs }) }
+    function tap(c) {
+      if (!myTurn()) return; const num = /\d/.test(c[1]);
+      if (S.pend) return c == S.pend ? go([c]) : 0;
+      if (sel.includes(c)) { sel = sel.filter(x => x != c); return render() }
+      if (!sel.length) { if (!ok(c)) return; if (!num || !mine().some(x => x != c && x[1] == c[1])) return go([c]); sel = [c] }
+      else { if (!num || c[1] != S.h[me].find(x => x == sel[0])[1]) return; sel.push(c) } render()
+    }
+
+    function bot() {
+      if (!S || S.ph != 'play' || !isBot(S.ids[S.turn])) return;
+      const h = S.h[S.ids[S.turn]];
+      const c = S.pend || h.find(x => ok(x) && x[0] != 'k') || h.find(x => ok(x));
+      if (!c) return processAction(S.ids[S.turn], 'draw');
+      const n = {}; h.forEach(x => x[0] != 'k' && (n[x[0]] = (n[x[0]] || 0) + 1));
+      const col = Object.keys(n).sort((a, b) => n[b] - n[a])[0] || rnd(['r', 'y', 'g', 'b']);
+      processAction(S.ids[S.turn], 'play', { cs: [c], col });
+    }
+
+    function card(c) {
+      const e = el('div', 'c ' + c[0]), t = L[c[1]] || c[1]; e.dataset.id = c;
+      e.innerHTML = `<i class=e></i><b class=t>${t}</b><b class=m>${t}</b><b class=u>${t}</b><i class=bk>UNO</i>`; return e
+    }
+    function fly(e, f, flip, delay = 0) {
+      if (matchMedia('(prefers-reduced-motion:reduce)').matches) { e.style.opacity = 1; return }
+      if (delay > 0) e.style.opacity = 0;
+      setTimeout(() => {
+        e.style.opacity = 1;
+        const r = e.getBoundingClientRect(), y = e.style.getPropertyValue('--dy') || '0px', q = e.style.getPropertyValue('--rot') || '0deg',
+          t = (x, z, a, s) => `translate(${x}px,calc(${z}px + ${y})) rotateY(${a}deg) rotate(${q}) scale(${s})`;
+        e.animate([{ transform: t(f.left - r.left, f.top - r.top, flip ? 180 : 0, flip ? 1 : .9), opacity: .6 }, { transform: t(0, 0, 0, 1), opacity: 1 }],
+          { duration: flip ? 600 : 380, easing: 'cubic-bezier(.2,.8,.2,1)' })
+      }, delay)
+    }
+
+    function seg(id, opts, def) {
+      const d = el('div', 'seg'); d.id = id; d.dataset.v = def;
+      opts.forEach(([v, l]) => {
+        const b = el('b', v == def ? 'on' : '', l);
+        b.onclick = () => { d.dataset.v = v;[...d.children].forEach(c => c.className = ''); b.className = 'on' };
+        d.append(b);
+      });
+      return d;
+    }
+
+    function lobby(s) {
+      const o = $('ov'), b = el('div', 'box'); o.innerHTML = '';
+      if (s && s.ph == 'over' && !s.ack) {
+        b.style.textAlign = 'center'; b.append(el('b', '', '🏆 ' + s.names[s.win] + ' Menang!'));
+        const ls = s.ids.filter(i => i != s.win).map(i => s.names[i]).join(', ');
+        if (ls) b.append(el('p', '', 'Dasar payah: ' + ls + ' 🤪'));
+        if (isHost) b.append(btn('Lanjut ke Pengaturan', () => sendAction('ack')));
+        else b.append(el('small', '', 'Menunggu host...'));
+        o.append(b); o.className = 'on'; return;
+      }
+      b.append(el('b', '', !ready ? 'Menghubungkan...' : !s ? 'Ruang UNO' : s.ph == 'over' ? 'Permainan Selesai' : 'Pertandingan sedang berjalan'));
+      if (ready) {
+        const l = live();
+        l.forEach(([i, p]) => {
+          const r = el('div', 'pl', p.name + (i == me ? ' (kamu)' : ''));
+          if (isHost && p.bot) { const x = el('span', '', '×'); x.style.cursor = 'pointer'; x.onclick = () => sendAction('delp', { id: i }); r.append(x) } b.append(r)
+        });
+        if (isHost) {
+          b.append(el('small', '', 'Bagikan kode room ini ke temanmu, mereka bisa masuk dengan kode yang sama.'));
+          if (l.length < 8) b.append(btn('Tambah bot', () => sendAction('addBot'), 's2'));
+          if (!s || s.ph == 'over') {
+            const r1 = el('div', 'pl'); r1.append(el('span', '', 'Kartu Awal:'), seg('s-card', [[5, '5'], [7, '7'], [10, '10']], 7));
+            const r2 = el('div', 'pl'); r2.append(el('span', '', 'Aturan Draw:'), seg('s-draw', [[1, '1x'], [2, '2x'], [3, '3x']], 1));
+            b.append(r1, r2);
+            const g = btn(s && s.ph == 'over' ? 'Main lagi' : 'Mulai', () => sendAction('start', { cardsToDeal: parseInt($('s-card').dataset.v), drawCount: parseInt($('s-draw').dataset.v) }));
+            g.disabled = l.length < 2; b.append(g)
+          }
+        } else b.append(el('small', '', 'Menunggu host mengatur permainan...'));
+      }
+      o.append(b); o.className = 'on'
+    }
+
+    function render() {
+      const hd = $('hand'), old = {}, opR = {}, dr = $('draw').getBoundingClientRect(), A = [], s = S, h = mine();
+      hd.querySelectorAll('.c').forEach(e => old[e.dataset.id] = e.getBoundingClientRect());
+      $('opp').querySelectorAll('.av').forEach(e => opR[e.dataset.id] = e.getBoundingClientRect());
+      for (const k of ['hand', 'opp', 'disc', 'draw', 'bar']) $(k).innerHTML = ''; $('msg').textContent = '';
+      if (s) {
+        const my = myTurn(), cur = s.ids[s.turn], k = s.ids.indexOf(me), els = {};
+        $('game-app').style.setProperty('--cur', CH[s.col]);
+        (k < 0 ? s.ids : s.ids.map((_, i) => s.ids[(i + k + 1) % s.ids.length]).filter(i => i != me)).forEach(i => {
+          const o = el('div', 'o'), a = el('div', 'av' + (i == cur && s.ph == 'play' ? ' on' : ''), (s.names[i] || '?')[0].toUpperCase());
+          a.dataset.id = i; a.append(el('span', 'n', s.h[i].length));
+          o.append(a, el('span', '', s.names[i] + (s.h[i].length == 1 ? ' – UNO!' : ''))); $('opp').append(o)
+        });
+        const d = $('dir'); d.textContent = s.dir < 0 ? '↺' : '↻'; d.className = s.dir < 0 ? 'rv' : '';
+        s.disc.slice(-5).forEach((c, i, arr) => {
+          const isTop = (i === arr.length - 1); const e = card(c);
+          if (isTop && c[0] == 'k' && s.col) e.className = 'c ' + s.col;
+          let hv = 0; for (let j = 0; j < c.length; j++)hv = Math.imul(31, hv) + c.charCodeAt(j) | 0;
+          e.style.setProperty('--rot', ((hv % 31) - 15) + 'deg');
+          e.style.setProperty('--dx', ((hv % 21) - 10) + 'px');
+          e.style.setProperty('--dy', (((hv >> 4) % 21) - 10) + 'px');
+          $('disc').append(e)
+        });
+        $('draw').className = 'pile' + (my && !s.pend ? ' go' : ''); $('draw').append(el('div', 'c back'));
+        const n = h.length, mid = (n - 1) / 2;
+        h.forEach((c, i) => {
+          const e = card(c); els[c] = e;
+          e.style.setProperty('--rot', ((i - mid) * Math.min(4, 30 / n)).toFixed(1) + 'deg');
+          e.style.setProperty('--dy', (Math.abs(i - mid) ** 2 * Math.min(1.2, 6 / n)).toFixed(1) + 'px');
+          e.style.setProperty('--dx', '0px');
+          if (sel.includes(c) || s.pend == c) e.classList.add('s');
+          if (my && (s.pend ? s.pend == c : ok(c))) e.classList.add('valid');
+          e.tabIndex = 0; e.onclick = () => tap(c); e.onkeydown = ev => ev.key == 'Enter' && tap(c); hd.append(e);
+          if (!pHand.includes(c) && !old[c]) {
+            const isDealing = pHand.length === 0 && h.length > 3;
+            A.push(() => fly(e, dr, 1, isDealing ? i * 120 : 0))
+          }
+        });
+        if (s.ph == 'play') {
+          let m = '';
+          if (my) { if (s.pend) m = 'Kartu ini cocok. Mainkan atau simpan?'; else if (s.drawPend > 0) m = `+${s.drawPend} kartu! Tumpuk kartu, atau Draw.`; else m = 'Giliranmu' }
+          else { m = 'Giliran ' + s.names[cur]; if (s.drawPend > 0) m += ` (+${s.drawPend})` }
+          $('msg').textContent = m;
+        }
+        if (my && s.pend) $('bar').append(btn('Mainkan', () => go([s.pend])), btn('Simpan', () => sendAction('keep'), 's2'));
+        else if (my && sel.length) $('bar').append(btn('Mainkan ' + sel.length + ' kartu', () => go(sel)), btn('Batal', () => { sel = []; render() }, 's2'));
+        const u = btn('UNO!', () => sendAction('uno')); u.id = 'uno'; u.disabled = !(my && n == 2 && !s.uno[me]); $('bar').append(u);
+        if (pS && pS.v != s.v) {
+          const top = s.disc[s.disc.length - 1], te = $('disc').lastElementChild;
+          if (pS.disc[pS.disc.length - 1] != top && te) { const f = old[top] || opR[pS.ids[pS.turn]]; if (f) A.push(() => fly(te, f)) }
+        }
+      }
+      if (!picking) {
+        const o = $('ov');
+        if (!ready || !s || s.ph == 'over' || !s.ids.includes(me)) { if (peer) lobby(s) }
+        else { o.className = ''; o.innerHTML = '' }
+      }
+      A.forEach(f => f()); pS = s; pHand = h.slice(); clearTimeout(bt);
+      if (s && s.ph == 'play' && isBot(s.ids[s.turn]) && isHost) bt = setTimeout(bot, 1500);
+    }
+    $('draw').onclick = () => { if (myTurn() && !S.pend) sendAction('draw') };
+
+    function showInit() {
+      const o = $('ov'), b = el('div', 'box'); b.append(el('b', '', 'UNO Online'));
+      const inpCode = el('input'); inpCode.placeholder = 'Kode Room'; inpCode.value = '';
+      inpCode.style = 'padding:10px; border-radius:8px; border:1px solid #ccc; font:inherit;';
+      const inpName = el('input'); inpName.placeholder = 'Nama Kamu'; inpName.value = localStorage.getItem('uno-name') || '';
+      inpName.style = 'padding:10px; border-radius:8px; border:1px solid #ccc; font:inherit;';
+      const btnJoin = btn('Masuk', () => {
+        if (!inpName.value.trim() || !inpCode.value.trim()) return alert('Isi nama dan kode room terlebih dahulu.');
+        localStorage.setItem('uno-name', inpName.value.trim());
+        o.className = ''; o.innerHTML = ''; initOnline(inpCode.value.trim(), inpName.value.trim());
+      });
+      b.append(inpCode, inpName, btnJoin); o.append(b); o.className = 'on';
+    }
+
+    async function initOnline(code, name) {
+      const roomId = 'uno-room-' + code.replace(/[^a-zA-Z0-9-]/g, '');
+      const U = 'c40f0c8902451c3054b38f8b', C = 'oDiK/a0+27rEgKAi';
+      const peerConf = {
+        host: 'uno-server-lxeo.onrender.com', port: 443, secure: true, path: '/uno', config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'turn:global.relay.metered.ca:80', username: U, credential: C },
+            { urls: 'turn:global.relay.metered.ca:80?transport=tcp', username: U, credential: C },
+            { urls: 'turn:global.relay.metered.ca:443', username: U, credential: C },
+            { urls: 'turns:global.relay.metered.ca:443?transport=tcp', username: U, credential: C },
+            { urls: ['turn:eu-0.turn.peerjs.com:3478', 'turn:us-0.turn.peerjs.com:3478'], username: 'peerjs', credential: 'peerjsp' }
+          ]
+        }
+      };
+      $('ov').className = 'on'; $('ov').innerHTML = '<div class="box"><b>Membangunkan server...</b></div>';
+      try { await fetch('https://uno-server-lxeo.onrender.com/uno/', { mode: 'no-cors', cache: 'no-store' }) } catch (e) { }
+      $('ov').innerHTML = '<div class="box"><b>Menghubungkan...</b></div>';
+      peer = new Peer(roomId, peerConf);
+
+      peer.on('open', id => {
+        isHost = true; me = 'host';
+        P = { host: { name: name + ' (Host)', t: Date.now(), bot: 0 } }; ready = true;
+
+        peer.on('connection', c => {
+          clients.push(c);
+          c.on('data', data => {
+            if (data.type === 'join') {
+              if (S && S.ph === 'play') { c.send({ type: 'rejected', msg: 'Pertandingan sedang berlangsung, harap tunggu hingga selesai.' }); return }
+              P[c.peer] = { name: data.name, t: Date.now(), bot: 0 }; broadcastState();
+            } else if (data.type === 'action') {
+              processAction(c.peer, data.action, data.data);
+            } else if (data.type === 'beat') {
+              if (P[c.peer]) P[c.peer].t = Date.now();
+            } else if (data.type === 'chat') {
+              clients.forEach(x => { if (x !== c) x.send(data) }); appendChat(data.name, data.msg, false);
+            }
+          });
+          c.on('close', () => { clients = clients.filter(x => x !== c); if (P[c.peer]) { delete P[c.peer]; broadcastState() } });
+          c.on('error', () => { clients = clients.filter(x => x !== c) });
+        });
+
+        setInterval(() => {
+          const now = Date.now(); let changed = false;
+          if (P.host) P.host.t = now;
+          Object.entries(P).forEach(([i, p]) => { if (!p.bot && i !== 'host' && now - p.t > 120000) { delete P[i]; changed = true } });
+          if (changed) broadcastState();
+        }, 30000);
+        render();
+      });
+
+      peer.on('error', err => {
+        if (err.type === 'unavailable-id') {
+          const fail = m => { alert(m); location.reload() };
+          isHost = false; peer = new Peer(peerConf);
+          peer.on('error', e => fail('Error WebRTC (' + e.type + '): ' + e.message));
+          peer.on('open', id => {
+            me = id; conn = peer.connect(roomId, { reliable: true });
+            conn.on('error', e => fail('Gagal konek ke Host: ' + e.message));
+            setTimeout(() => { if (!conn.open) fail('Gagal konek ke host. Cek TURN atau jaringan Anda.') }, 20000);
+            conn.on('open', () => {
+              ready = true; conn.send({ type: 'join', name: name });
+              setInterval(() => conn.send({ type: 'beat' }), 30000);
+            });
+            conn.on('data', data => {
+              if (data.type === 'sync') { S = data.S; P = data.P; sel = []; render() }
+              else if (data.type === 'chat') appendChat(data.name, data.msg, false);
+              else if (data.type === 'clear-chat') $('chat-msgs').innerHTML = '';
+              else if (data.type === 'rejected') { alert(data.msg); location.reload() }
+            });
+            conn.on('close', () => { alert('Host terputus. Permainan berakhir.'); location.reload() });
+          });
+        } else { alert('Error jaringan: ' + err.message); location.reload() }
+      });
+    }
+
+    $('chat-btn').onclick = () => {
+      $('chat-ui').style.display = 'flex';
+      $('chat-btn').style.transform = 'scale(1)';
+      $('chat-notif').style.display = 'none';
+      setTimeout(() => $('chat-msgs').scrollTop = $('chat-msgs').scrollHeight, 10);
+    };
+    $('close-chat').onclick = () => $('chat-ui').style.display = 'none';
+    function sendChat() {
+      const i = $('chat-inp'); if (!i.value.trim() || !ready) return;
+      const myName = P[me == 'host' ? 'host' : me]?.name || 'Pemain';
+      const msg = { type: 'chat', name: myName, msg: i.value.trim() };
+      if (isHost) clients.forEach(c => c.send(msg));
+      else if (conn && conn.open) conn.send(msg);
+      appendChat(myName, msg.msg, true);
+      i.value = '';
+    }
+    $('chat-send').onclick = sendChat;
+    $('chat-inp').onkeydown = e => { if (e.key == 'Enter') sendChat() };
+    function appendChat(name, msg, isMe) {
+      const c = $('chat-msgs'), d = el('div');
+      d.style.display = 'flex'; d.style.flexDirection = 'column'; d.style.alignItems = isMe ? 'flex-end' : 'flex-start';
+      d.innerHTML = `<small style="opacity:.6;margin:0 4px 2px;font-size:11px">${name}</small><div style="background:${isMe ? 'var(--cur)' : 'var(--pane)'};color:${isMe ? '#fff' : 'inherit'};padding:8px 12px;border-radius:12px;max-width:85%;word-break:break-word;box-shadow:0 1px 2px rgba(0,0,0,.1)">${msg.replace(/</g, '&lt;')}</div>`;
+      const isAtBottom = c.scrollHeight - c.scrollTop - c.clientHeight < 50;
+      c.append(d);
+      if (isMe || isAtBottom) setTimeout(() => c.scrollTop = c.scrollHeight, 10);
+      if ($('chat-ui').style.display !== 'flex') {
+        $('chat-btn').style.transform = 'scale(1.2)'; setTimeout(() => $('chat-btn').style.transform = 'scale(1)', 500);
+        if (!isMe) $('chat-notif').style.display = 'block';
+      }
+    }
+
+    showInit();
+  </script>
+</body>
+
+</html>
