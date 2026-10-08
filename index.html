@@ -301,7 +301,6 @@ function showInit(){
  inpName.style='padding:10px; border-radius:8px; border:1px solid #ccc; font:inherit;';
  const btnJoin=btn('Masuk',()=>{
   if(!inpName.value.trim()||!inpCode.value.trim())return alert('Isi nama dan kode room terlebih dahulu.');
-  if(inpCode.value.trim().toLowerCase()!=='lovecimi')return alert('Kode Room salah!');
   localStorage.setItem('uno-name',inpName.value.trim());
   o.className='';o.innerHTML='';initOnline(inpCode.value.trim(),inpName.value.trim());
  });
@@ -310,7 +309,8 @@ function showInit(){
 
 function initOnline(code,name){
  const roomId='uno-room-'+code.replace(/[^a-zA-Z0-9-]/g,'');
- peer=new Peer(roomId);
+ const peerConf={config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]}};
+ peer=new Peer(roomId, peerConf);
  $('ov').className='on';$('ov').innerHTML='<div class="box"><b>Menghubungkan...</b></div>';
  
  peer.on('open',id=>{
@@ -344,7 +344,7 @@ function initOnline(code,name){
  
  peer.on('error',err=>{
   if(err.type==='unavailable-id'){
-   isHost=false;peer=new Peer();
+   isHost=false;peer=new Peer(peerConf);
    peer.on('open',id=>{
     me=id;conn=peer.connect(roomId);
     conn.on('open',()=>{
