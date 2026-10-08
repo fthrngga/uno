@@ -309,9 +309,14 @@ function showInit(){
 
 async function initOnline(code,name){
  const roomId='uno-room-'+code.replace(/[^a-zA-Z0-9-]/g,'');
+ const U='c40f0c8902451c3054b38f8b', C='oDiK/a0+27rEgKAi';
  const peerConf={host:'uno-server-lxeo.onrender.com',port:443,secure:true,path:'/uno',config:{iceServers:[
   {urls:'stun:stun.l.google.com:19302'},
   {urls:'stun:stun1.l.google.com:19302'},
+  {urls:'turn:global.relay.metered.ca:80',username:U,credential:C},
+  {urls:'turn:global.relay.metered.ca:80?transport=tcp',username:U,credential:C},
+  {urls:'turn:global.relay.metered.ca:443',username:U,credential:C},
+  {urls:'turns:global.relay.metered.ca:443?transport=tcp',username:U,credential:C},
   {urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}
  ]}};
  $('ov').className='on';$('ov').innerHTML='<div class="box"><b>Membangunkan server...</b></div>';
