@@ -309,7 +309,7 @@ function showInit(){
 
 function initOnline(code,name){
  const roomId='uno-room-'+code.replace(/[^a-zA-Z0-9-]/g,'');
- const peerConf={host:'uno-server-lxeo.onrender.com',secure:true,path:'/uno',config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]}};
+ const peerConf={host:'uno-server-lxeo.onrender.com',port:443,secure:true,path:'/uno',config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]}};
  peer=new Peer(roomId, peerConf);
  $('ov').className='on';$('ov').innerHTML='<div class="box"><b>Menghubungkan...</b></div>';
  
